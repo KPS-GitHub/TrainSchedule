@@ -147,7 +147,7 @@ $("#add-train-btn").on("click", function(event) {
     var minutesAway = (trainFrequency) - ((moment().diff(trainTimeMinusYear, "m")) % (trainFrequency));
     console.log(minutesAway);
 
-    var nextArrival = moment.unix(moment() + minutesAway + (12*60)).format("LTS");
+    var nextArrival = moment.unix(moment().add("minutes", (12*60))).add("minutes", minutesAway).format("LTS");
   
     // Add each train's data into the table
     $("#train-table > tbody").append("<tr><td>" + trainName + "</td><td>" + trainDestination + "</td><td>" +
