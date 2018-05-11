@@ -87,4 +87,71 @@ $("#content").append(formHtml);
 // END OF INITIAL PAGE RENDERING
 
 
+// CORE FUNCTIONALITY
+$("#add-train-btn").on("click", function(event) {
+    event.preventDefault();
+  
+    // Grabs user input
+    var trainName = $("#train-name-input").val().trim();
+    var trainDestination = $("#train-destination-input").val().trim();
+    var trainTime = moment($("#train-time-input").val().trim(), "HH:mm").format("X");
+    var trainFrequency = $("#train-frequency-input").val().trim();
+  
+    // Creates local "temporary" object for holding employee data
+    var newTrain = {
+      name: trainName,
+      destination: trainDestination,
+      time: trainTime,
+      frequency: trainFrequency
+    };
+  
+    // Uploads employee data to the database
+    database.ref().push(newTrain);
+  
+    // Logs everything to console
+    console.log(newTrain.name);
+    console.log(newTrain.destination);
+    console.log(newTrain.time);
+    console.log(newTrain.frequency);
+  
+    // Alert
+    alert("Train successfully added");
+  
+    // Clears all of the text-boxes
+    $("#train-name-input").val("");
+    $("#train-destination-input").val("");
+    $("#train-time-input").val("");
+    $("#train-frequency-input").val("");
+  });
+  
+  // 3. Create Firebase event for adding train to the database and a row in the html when a user adds an entry
+  database.ref().on("child_added", function(childSnapshot, prevChildKey) {
+  
+    console.log(childSnapshot.val());
+  
+    // Store everything into a variable.
+    var trainName = childSnapshot.val().name;
+    var trainDestination = childSnapshot.val().destination;
+    var trainTime = childSnapshot.val().time;
+    var trainFrequency = childSnapshot.val().frequency;
+  
+    // train Info
+    console.log(trainName);
+    console.log(trainDestination);
+    console.log(trainTime);
+    console.log(trainFrequency);
+
+  
+    // Calculate how many minutes away the next train is
+    var trainTimeMinusYear = moment(trainTime, "X") - (365*24*60*60); // in seconds
+    var minutesAway = (trainFrequency) - ((moment().diff(trainTimeMinusYear, "m")) % (trainFrequency));
+    console.log(minutesAway);
+
+    var nextArrival = moment.unix(moment() + minutesAway + (12*60)).format("LTS");
+  
+    // Add each train's data into the table
+    $("#train-table > tbody").append("<tr><td>" + trainName + "</td><td>" + trainDestination + "</td><td>" +
+    trainFrequency + "</td><td>" + nextArrival + "</td><td>" + minutesAway + "</td></tr>");
+  });
+
 }) // end of doc.ready
